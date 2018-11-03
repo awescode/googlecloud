@@ -167,7 +167,8 @@ class GoogleCloud
 
             $img = $this->getHtmlImg([
                 $this->getSrc($url, 'dynamic', $isTest),
-                $this->getAlt()
+                $this->getAlt(),
+                $this->getTitle()
             ]);
 
             $cacheHtml = $this->getHtmlPicture($attributes, $img, $sources,'dynamic', $isTest);
@@ -180,7 +181,8 @@ class GoogleCloud
 
             $img = $this->getHtmlImg([
                 $this->getSrc($url, 'static', $isTest),
-                $this->getAlt()
+                $this->getAlt(),
+                $this->getTitle()
             ]);
 
             $cacheHtml = $this->getHtmlPicture($attributes, $img, $sources, 'static', $isTest);
@@ -750,6 +752,19 @@ class GoogleCloud
     {
         if ($this->hasOption('alt')) {
             return 'alt="' . $this->getOption('alt') . '"';
+        }
+        return '';
+    }
+
+    /**
+     * Getting Title tag
+     *
+     * @return string
+     */
+    private function getTitle()
+    {
+        if ($this->hasOption('title')) {
+            return 'title="' . $this->getOption('title') . '"';
         }
         return '';
     }
