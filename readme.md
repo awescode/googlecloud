@@ -87,6 +87,7 @@ $options = [
             'media' => '(max-width: 1366px)',
             'width' => 1366,
             'height' => 650,
+            'main' => true   // this image will be issed for <img /> tag, if the param is missing, will use first from array 
         ],
         [
             'media' => '(max-width: 2732px)',
