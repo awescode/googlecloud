@@ -116,6 +116,7 @@ class GoogleCloud
                 $this->getSrc($file, 'dynamic', $isTest),
                 $this->getSrcSet($file2x, 'dynamic', $isTest),
                 $this->getAlt(),
+                $this->getTitle(),
                 $this->getAttributes()
             ];
 
@@ -128,6 +129,7 @@ class GoogleCloud
                 $this->getSrc($file, 'static', $isTest),
                 $this->getSrcSet($file2x, 'static', $isTest),
                 $this->getAlt(),
+                $this->getTitle(),
                 $this->getAttributes()
             ];
 
@@ -726,7 +728,7 @@ class GoogleCloud
     private function getAttributes($overwrite = [])
     {
         $attrOutput = [];
-        $attrsAvailable = ['class', 'id', 'title', 'attr', 'media'];
+        $attrsAvailable = ['class', 'id', 'attr', 'media'];
         foreach ($attrsAvailable as $attr_name) {
             $attr_value = $this->getOption($attr_name, $overwrite);
             if ($attr_value != null) {
