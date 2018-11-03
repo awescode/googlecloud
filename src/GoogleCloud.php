@@ -3,8 +3,10 @@
 namespace Awescode\GoogleCloud;
 
 use Awescode\GoogleCloud\App\Encode;
+use Awescode\GoogleCloud\App\DecodeURL;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Contracts\Filesystem\Filesystem as Disk;
+
 
 class GoogleCloud
 {
@@ -22,6 +24,11 @@ class GoogleCloud
      * Key for caching links
      */
     protected $cache_key;
+
+    /*
+     * Tmp array with main image for <picture>
+     */
+    protected $picture_main_image;
 
     // Default values of options
     protected $options = [
@@ -99,7 +106,9 @@ class GoogleCloud
 
         $this->setOptions($option);
 
-        $file = $this->getUrl($path, $this->isRetina(-1));
+        $url = $this->getUrl($path, $this->isRetina(-1));
+
+        $file = $this->convertUrl($url);
 
         if (!$this->hasFile($file)) {
             $file2x = $this->getUrl2x($path);
@@ -147,18 +156,21 @@ class GoogleCloud
 
         $this->setOptions($option);
 
-        $file = $this->getUrl($path);
+        $sources = $this->getHtmlSources($path);
+        $url = $this->getUrlFromOption($path, $this->picture_main_image);
+
+        $file = $this->convertUrl($url);
 
         if (!$this->hasFile($file)) {
 
-            $sources = $this->getHtmlSources($path, 'dynamic', $isTest);
             $attributes = $this->getAttributes();
+
             $img = $this->getHtmlImg([
-                $this->getSrc($file),
+                $this->getSrc($file, 'dynamic', $isTest),
                 $this->getAlt()
             ]);
 
-            $cacheHtml = $this->getHtmlPicture($attributes, $img, $sources);
+            $cacheHtml = $this->getHtmlPicture($attributes, $img, $sources,'dynamic', $isTest);
 
             $end = microtime(true);
             return $this->res($cacheHtml, 'PICTURE: dynamic, time: ' . round(($end - $start) / 1000, 4));
@@ -166,11 +178,11 @@ class GoogleCloud
             $sources = $this->getHtmlSources($path, 'static', $isTest);
             $attributes = $this->getAttributes();
             $img = $this->getHtmlImg([
-                $this->getSrc($file),
+                $this->getSrc($file, 'static', $isTest),
                 $this->getAlt()
             ]);
 
-            $cacheHtml = $this->getHtmlPicture($attributes, $img, $sources);
+            $cacheHtml = $this->getHtmlPicture($attributes, $img, $sources, 'static', $isTest);
 
             $this->setCache($key, $cacheHtml);
             $end = microtime(true);
@@ -221,22 +233,53 @@ class GoogleCloud
         return md5($type . $path . json_encode($option));
     }
 
-    /** Generate <sources> for tag <picture>
+    private function convertUrl($file)
+    {
+        $gh = new DecodeURL($file);
+        $gh->decodeUrl();
+        return $gh->image;
+    }
+
+    /**
+     * Generate <sources> for tag <picture>
+     *
      * @param $path
-     * @param string $mode
-     * @param bool $isTest
-     * @return string
+     * @return array
      */
-    private function getHtmlSources($path, $mode = '', $isTest = false)
+    private function getHtmlSources($path)
     {
         $sources = [];
         $sourceOptions = $this->getCollectOptions();
 
+        $this->saveMainImage($sourceOptions);
+
         foreach ($this->getOption('srcset') as $item) {
-            $sources[] = $this->getSource($path, $sourceOptions, $item, $mode, $isTest);
+            $sources[] = $this->getSource($path, $sourceOptions, $item);
             $sourceOptions = $this->reorderCollection($sourceOptions);
         }
-        return implode(" ", $sources);
+        return $sources;
+    }
+
+    /**
+     * Function for storing main image for <picture>. If option main empty it will get first
+     *
+     * @param $options
+     * @return bool
+     */
+    private function saveMainImage($options)
+    {
+        foreach($options as $option) {
+            $option = (array)$option;
+            if (isset($option['main']) && $option['main']) {
+                $this->picture_main_image = (object)$option;
+                return true;
+            }
+        }
+        if (isset($options[0])) {
+            $this->picture_main_image = $options[0];
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -287,26 +330,48 @@ class GoogleCloud
      * @param $path
      * @param $sourceOptions
      * @param $item
-     * @param $mode
-     * @param $isTest
-     * @return string
+     * @return array
      */
-    private function getSource($path, $sourceOptions, $item, $mode, $isTest)
+    private function getSource($path, $sourceOptions, $item)
     {
         $options = $this->collectionFiltering($item, $this->options);
 
         $imgClass = new Encode($path, $options, $this->config);
 
-        $file = $imgClass->getPath(null, $sourceOptions);
+        return ['file' => $imgClass->getPath(null, $sourceOptions), 'item' => $item];
 
-        $url = $this->urlGenerate($file, $mode, $isTest);
-
-        $elements = [
-            'src="' . $url . '"',
-            $this->getAttributes($item)
-        ];
-        return '<source ' . implode(" ", $elements) . '>';
     }
+
+    /**
+     * Generation of HTML for <picture>
+     *
+     * @param $sources
+     * @param $mode
+     * @param $isTest
+     * @return string
+     */
+    private function getHTMLFromSources($sources, $mode, $isTest)
+    {
+        $output = [];
+        foreach($sources as $source) {
+            $file = $source['file'];
+            $item = [];
+            if (isset($source['item'])) {
+                $item = $source['item'];
+            }
+            $url = $this->urlGenerate($file, $mode, $isTest);
+            $elements = [
+                'src="' . $url . '"',
+                $this->getAttributes($item)
+            ];
+            $output[] = '<source ' . implode(" ", $elements) . '>';
+        }
+        return implode(" ", $output);
+    }
+
+
+
+
 
     /**
      * Merging configs for <picture> <source> tags
@@ -642,9 +707,10 @@ class GoogleCloud
      * @param $sources
      * @return string
      */
-    private function getHtmlPicture($attributes, $img, $sources)
+    private function getHtmlPicture($attributes, $img, $sources, $mode, $isTest)
     {
-        return '<picture' . (($attributes != '') ? (' ' . $attributes) : '') . '>' . $sources . $img . '</picture>';
+        $sourcesHTML = $this->getHTMLFromSources($sources, $mode, $isTest);
+        return '<picture' . (($attributes != '') ? (' ' . $attributes) : '') . '>' . $sourcesHTML . $img . '</picture>';
     }
 
 
@@ -715,6 +781,19 @@ class GoogleCloud
     }
 
     /**
+     * Get URL from income options
+     *
+     * @param $path
+     * @param $options
+     * @return string
+     */
+    private function getUrlFromOption($path, $options)
+    {
+        $imgClass = new Encode($path, $options, $this->config);
+        return $imgClass->getPath();
+    }
+
+    /**
      * Get URL 2x from options
      *
      * @param $path
@@ -777,6 +856,7 @@ class GoogleCloud
             'title' => $this->getOption('title', $options),
             'ext' => $this->getOption('extension', $options),
             'original' => $this->getOption('original', $options),
+            'main' => $this->getOption('main', $options)
         ];
 
         return $options;
@@ -816,9 +896,9 @@ class GoogleCloud
      * @param bool $original
      * @return string
      */
-    private function sUrl($original = false)
+    private function sUrl()
     {
-        return (!$original)
+        return (!$this->getOption('original'))
             ? $this->config['cdn-static'] . '/' . $this->config['thumb_folder'] . '/'
             : $this->config['cdn-static'] . '/';
     }

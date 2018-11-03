@@ -9,6 +9,8 @@ This is where your description should go. Take a look at [contributing.md](contr
 
 ## Installation
 
+### Laravel
+
 Via Composer
 
 ``` bash
@@ -28,6 +30,14 @@ You can publish the config file with:
 
 ```bash
 php artisan vendor:publish --provider="Awescode\GoogleCloud\Providers\GoogleCloudServiceProvider" --tag="config"
+```
+
+### Google App
+
+```bash
+cd ./src/App
+composer install
+gcloud app deploy --project={project_id}
 ```
 
 ## Available options

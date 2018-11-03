@@ -2,7 +2,7 @@
 
 return [
 
-    'debug' => false,
+    'debug' => true,
 
     'cdn-dynamic' => 'https://img.lagerbox.com',
     'cdn-static' => 'https://cdn.lagerbox.com',

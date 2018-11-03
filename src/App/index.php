@@ -11,7 +11,7 @@ use google\appengine\api\cloud_storage\CloudStorageTools;
 $gh = new DecodeURL($_SERVER['REQUEST_URI']);
 
 // If request is okay
-if ($gh->decodeUrl()) {
+if (!$gh->decodeUrl()) {
     header("HTTP/1.0 404 Not Found");
     exit;
 }
