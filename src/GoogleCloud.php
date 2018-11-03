@@ -763,7 +763,7 @@ class GoogleCloud
      * @param array $overwrite
      * @return array|object
      */
-    private function mappingToEncode($overwrite = [])
+    public function mappingToEncode($overwrite = [])
     {
         if ($overwrite == []) {
             $options = $this->options;

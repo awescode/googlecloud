@@ -61,7 +61,28 @@ $options = [
         * `width`, `height`, `cropmode`, `isretina`, `original` will be ignered
     */    
     'srcset'    => [        
-            
+        [
+            'media' => '(max-width: 375px)',
+            'class' => 'class-375',
+            'width' => 375,
+            'height' => 671,
+        ],
+        [
+            'media' => '(max-width: 750px)',
+            'class' => 'class-750',
+            'width' => 750,
+            'height' => 1342,
+        ],
+        [
+            'media' => '(max-width: 1366px)',
+            'width' => 1366,
+            'height' => 650,
+        ],
+        [
+            'media' => '(max-width: 2732px)',
+            'width' => 2732,
+            'height' => 1300,
+        ]
     ]
 ];
 ```
@@ -79,7 +100,7 @@ $options = [
 
 ##### Return `URL` of the image
 ```php
-    echo GoogleCloud::src($path, $options = []);
+    echo GoogleCloud::url($path, $options = []);
 ```
 
 ## Testing

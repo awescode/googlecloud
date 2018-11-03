@@ -4,10 +4,12 @@
     "class": "css-image",
     "title": "Best title ever",
     "alt": "Best alt ever",
+    "width": 1366,
+    "height": 650,
     "srcset": [
       {"media":"(max-width: 375px)", "class":"class-375", "width": 375, "height": 671},
       {"media":"(max-width: 750px)", "class":"class-750", "width": 750, "height": 1342},
-      {"media":"(max-width: 1366px)","width": 1366, "height": 650, "main": true},
+      {"media":"(max-width: 1366px)","width": 1366, "height": 650},
       {"media":"(max-width: 2732px)","width": 2732, "height": 1300}
     ]
   },
