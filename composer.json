@@ -1,0 +1,67 @@
+{
+    "name": "awescode/googlecloud",
+    "description": "🍕 The Laravel Package for cropping images based on Google Cloud 🚀 Services.",
+    "keywords": [
+        "laravel",
+        "framework",
+        "cropping",
+        "compressing",
+        "cloud",
+        "google",
+        "gcs"
+    ],
+    "license": "GPL-3.0-or-later",
+    "authors": [
+        {
+            "name": "Awescode GmbH",
+            "email": "info@awescode.de",
+            "homepage": "https://www.awescode.de",
+            "role": "Owner"
+        },
+        {
+            "name": "theAlex",
+            "email": "info@theAlex.ru",
+            "homepage": "https://thealex.ru/"
+        },
+        {
+            "name": "Yevhen Lisovenko",
+            "email": "y.lisovenko@awescode.de",
+            "homepage": "https://www.awescode.de"
+        }
+    ],
+    "support": {
+        "email": "support@awescode.de"
+    },
+    "require": {
+        "php": "^7.1.3",
+        "illuminate/cache": "5.5.*|5.6.*|5.7.*",
+        "jbroadway/urlify": "^1.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5|^7.0",
+        "orchestra/testbench": "~3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Awescode\\GoogleCloud\\": "src/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --colors=always"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Awescode\\GoogleCloud\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Awescode\\GoogleCloud\\GoogleCloudServiceProvider"
+            ],
+            "aliases": {
+                "GoogleCloud": "Awescode\\GoogleCloud\\Facades\\GoogleCloud"
+            }
+        }
+    }
+}

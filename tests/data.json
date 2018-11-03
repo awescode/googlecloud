@@ -1,0 +1,80 @@
+[{
+  "in_path": "images\/photo-2323.jpg",
+  "in_options": {
+    "class": "css-image",
+    "title": "Best title ever",
+    "alt": "Best alt ever",
+    "srcset": [
+      {"media":"(max-width: 375px)", "class":"class-375", "width": 375, "height": 671},
+      {"media":"(max-width: 750px)", "class":"class-750", "width": 750, "height": 1342},
+      {"media":"(max-width: 1366px)","width": 1366, "height": 650, "main": true},
+      {"media":"(max-width: 2732px)","width": 2732, "height": 1300}
+    ]
+  },
+  "out_url": "images\/best-alt-ever_photo-2323_01adfba9_1_l75.jpg",
+  "out_img": "<img src=\"images\/best-alt-ever_photo-2323_01adfba9_1_l75.jpg\" alt=\"Best alt ever\" class=\"css-image\" title=\"Best title ever\" \/>",
+  "out_picture": "<picture class=\"css-image\" title=\"Best title ever\"><source src=\"images\/best-alt-ever_photo-2323_|secretHash|_1_l75-w375-h671-c--l75-w750-h1342-c--l75-w1366-h650-c--l75-w2732-h1300-c.jpg\" class=\"class-375\" media=\"(max-width: 375px)\"> <source src=\"images\/best-alt-ever_photo-2323_|secretHash|_1_l75-w750-h1342-c--l75-w1366-h650-c--l75-w2732-h1300-c--l75-w375-h671-c.jpg\" class=\"class-750\" media=\"(max-width: 750px)\"> <source src=\"images\/best-alt-ever_photo-2323_e072fd90_1_l75-w1366-h650-c--l75-w2732-h1300-c--l75-w375-h671-c--l75-w750-h1342-c.jpg\" media=\"(max-width: 1366px)\"> <source src=\"images\/best-alt-ever_photo-2323_0d811eba_1_l75-w2732-h1300-c--l75-w375-h671-c--l75-w750-h1342-c--l75-w1366-h650-c.jpg\" media=\"(max-width: 2732px)\"><img src=\"images\/best-alt-ever_photo-2323_01adfba9_1_l75.jpg\" alt=\"Best alt ever\" \/><\/picture>"
+},
+  {
+  "in_path": "images\/photo-2323.jpg",
+  "in_options": {
+    "width": 150,
+    "isretina": true,
+    "extension": "webp"
+  },
+  "out_url": "images\/_photo-2323_|secretHash|_1_s150-l75.webp",
+  "out_img": "<img src=\"images\/_photo-2323_|secretHash|_1_s150-l75--s300-l75.webp\" srcset=\"images\/_photo-2323_|secretHash2|_1_s300-l75--s150-l75.webp 2x\" \/>"
+},
+  {
+  "in_path": "images\/photo-2323.jpg",
+  "in_options": {
+    "width": 150,
+    "isretina": false
+  },
+  "out_url": "images\/_photo-2323_|secretHash|_1_s150-l75.jpg",
+  "out_img": "<img src=\"images\/_photo-2323_|secretHash|_1_s150-l75.jpg\" \/>"
+},
+  {
+    "in_path": "images\/photo-2323.jpg",
+    "in_options": {
+      "width": 150,
+      "isretina": false,
+      "extension": "png"
+    },
+    "out_url": "images\/_photo-2323_|secretHash|_1_s150-l75.png",
+    "out_img": "<img src=\"images\/_photo-2323_|secretHash|_1_s150-l75.png\" \/>"
+  },
+  {
+  "in_path": "images\/photo-2323.jpg",
+  "in_options": {
+    "quality": 100,
+    "attr": {"test-cafe":"abc", "data-js": "2sdfs"},
+    "title": "<script>\"",
+    "alt": "adasdsad\"",
+    "width": 400,
+    "isretina": true
+  },
+  "out_url": "images\/adasdsad-quot_photo-2323_|secretHash|_1_s400-l100.jpg",
+  "out_img": "<img src=\"images\/adasdsad-quot_photo-2323_|secretHash|_1_s400-l100--s800-l100.jpg\" srcset=\"images\/adasdsad-quot_photo-2323_|secretHash2|_1_s800-l100--s400-l100.jpg 2x\" alt=\"adasdsad quot\" title=\"lt script gt quot\" test-cafe=\"abc\" data-js=\"2sdfs\" \/>"
+},
+  {
+    "in_path": "images\/photo-2323.jpg",
+    "in_options": {
+      "quality": 100,
+      "attr": {"test-cafe":"abc", "data-js": "2sdfs"},
+      "title": "<script>\"",
+      "alt": "adasdsad\"",
+      "width": 400,
+      "isretina": false
+    },
+    "out_url": "images\/adasdsad-quot_photo-2323_|secretHash|_1_s400-l100.jpg",
+    "out_img": "<img src=\"images\/adasdsad-quot_photo-2323_|secretHash|_1_s400-l100.jpg\" alt=\"adasdsad quot\" title=\"lt script gt quot\" test-cafe=\"abc\" data-js=\"2sdfs\" \/>"
+  },
+  {
+    "in_path": "images\/photo-2323.jpg",
+    "in_options": {
+    },
+    "out_url": "images\/photo-2323.jpg",
+    "out_img": "<img src=\"images\/photo-2323.jpg\" \/>"
+  }
+]
