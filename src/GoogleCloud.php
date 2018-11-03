@@ -166,7 +166,7 @@ class GoogleCloud
             $attributes = $this->getAttributes();
 
             $img = $this->getHtmlImg([
-                $this->getSrc($file, 'dynamic', $isTest),
+                $this->getSrc($url, 'dynamic', $isTest),
                 $this->getAlt()
             ]);
 
@@ -175,10 +175,11 @@ class GoogleCloud
             $end = microtime(true);
             return $this->res($cacheHtml, 'PICTURE: dynamic, time: ' . round(($end - $start) / 1000, 4));
         } else {
-            $sources = $this->getHtmlSources($path, 'static', $isTest);
+
             $attributes = $this->getAttributes();
+
             $img = $this->getHtmlImg([
-                $this->getSrc($file, 'static', $isTest),
+                $this->getSrc($url, 'static', $isTest),
                 $this->getAlt()
             ]);
 
