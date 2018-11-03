@@ -362,7 +362,7 @@ class GoogleCloud
             }
             $url = $this->urlGenerate($file, $mode, $isTest);
             $elements = [
-                'src="' . $url . '"',
+                'srcset="' . $url . '"',
                 $this->getAttributes($item)
             ];
             $output[] = '<source ' . implode(" ", $elements) . '>';
