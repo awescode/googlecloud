@@ -159,7 +159,7 @@ class GoogleCloud
         $this->setOptions($option);
 
         $sources = $this->getHtmlSources($path);
-        $url = $this->getUrlFromOption($path, $this->picture_main_image);
+        $url = $this->getUrlFromOption($this->picture_main_image);
 
         $file = $this->convertUrl($url);
 
@@ -242,7 +242,7 @@ class GoogleCloud
     {
         $gh = new DecodeURL($file);
         $gh->decodeUrl();
-        return $gh->image;
+        return $gh->thumb;
     }
 
     /**
@@ -256,10 +256,10 @@ class GoogleCloud
         $sources = [];
         $sourceOptions = $this->getCollectOptions();
 
-        $this->saveMainImage($sourceOptions);
-
         foreach ($this->getOption('srcset') as $item) {
-            $sources[] = $this->getSource($path, $sourceOptions, $item);
+            $source = $this->getSource($path, $sourceOptions, $item);
+            $this->saveMainImage($item, $source);
+            $sources[] = $source;
             $sourceOptions = $this->reorderCollection($sourceOptions);
         }
         return $sources;
@@ -271,17 +271,10 @@ class GoogleCloud
      * @param $options
      * @return bool
      */
-    private function saveMainImage($options)
+    private function saveMainImage($options, $source)
     {
-        foreach($options as $option) {
-            $option = (array)$option;
-            if (isset($option['main']) && $option['main']) {
-                $this->picture_main_image = (object)$option;
-                return true;
-            }
-        }
-        if (isset($options[0])) {
-            $this->picture_main_image = $options[0];
+        if (isset($options['main']) && $options['main'] == 1) {
+            $this->picture_main_image = $source;
             return true;
         }
         return false;
@@ -801,14 +794,15 @@ class GoogleCloud
     /**
      * Get URL from income options
      *
-     * @param $path
      * @param $options
      * @return string
      */
-    private function getUrlFromOption($path, $options)
+    private function getUrlFromOption($options)
     {
-        $imgClass = new Encode($path, $options, $this->config);
-        return $imgClass->getPath();
+        if (isset($options['file'])) {
+            return $options['file'];
+        }
+        return '';
     }
 
     /**
