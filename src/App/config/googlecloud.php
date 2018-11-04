@@ -3,6 +3,7 @@
 return [
 
     'debug' => true,
+    'cache' => true,
 
     'cdn-dynamic' => 'https://img.lagerbox.com',
     'cdn-static' => 'https://cdn.lagerbox.com',
@@ -19,5 +20,6 @@ return [
     'slug_length' => 60,
     'locally' => 'de',
     'storage' => 'gcs',
-    'no-image' => '<!-- no image -->'
+    'is_not_image' => '<!-- google cloud: :path - is not an image -->',
+    'no_image' => '<!-- google cloud: no image -->'
 ];

@@ -30,6 +30,8 @@ class GoogleCloud
      */
     protected $picture_main_image;
 
+    protected $available_extensions = ['jpg', 'png', 'gif', 'webp'];
+
     // Default values of options
     protected $options = [
         'cropmode' => 'strong',
@@ -68,6 +70,11 @@ class GoogleCloud
      */
     public function url($path, $option = [], $isTest = false)
     {
+        $pathStatus = $this->isNotFile($path);
+        if ($pathStatus) {
+            return '';
+        }
+
         $key = $this->getCacheKey('url', $path, $option);
         if ($cacheHtml = $this->getCache($key)) {
             return $this->res($cacheHtml, 'URL: from cache');
@@ -98,6 +105,11 @@ class GoogleCloud
      */
     public function img($path, $option = [], $isTest = false)
     {
+        $pathStatus = $this->isNotFile($path);
+        if ($pathStatus) {
+            return $pathStatus;
+        }
+
         $key = $this->getCacheKey('image', $path, $option);
         if ($cacheHtml = $this->getCache($key)) {
             return $this->res($cacheHtml, 'IMG: from cache');
@@ -150,6 +162,11 @@ class GoogleCloud
      */
     public function picture($path, $option = [], $isTest = false)
     {
+        $pathStatus = $this->isNotFile($path);
+        if ($pathStatus) {
+            return $pathStatus;
+        }
+
         $key = $this->getCacheKey('picture', $path, $option);
         if ($cacheHtml = $this->getCache($key)) {
             return $this->res($cacheHtml, 'PICTURE: from cache');
@@ -238,11 +255,31 @@ class GoogleCloud
         return md5($type . $path . json_encode($option));
     }
 
+    /**
+     * @param $file
+     * @return mixed
+     */
     private function convertUrl($file)
     {
         $gh = new DecodeURL($file);
         $gh->decodeUrl();
         return $gh->thumb;
+    }
+
+    /**
+     * @param $path
+     * @return bool|mixed
+     */
+    private function isNotFile($path)
+    {
+        $fileInfo = new \SplFileInfo($path);
+
+        $fileExt = $fileInfo->getExtension();
+
+        if (!in_array($fileExt, $this->available_extensions)) {
+            return str_replace(":path", $path, $this->config['is_not_image']);
+        }
+        return false;
     }
 
     /**
@@ -333,7 +370,6 @@ class GoogleCloud
     private function getSource($path, $sourceOptions, $item)
     {
         $options = $this->collectionFiltering($item, $this->options);
-
         $imgClass = new Encode($path, $options, $this->config);
 
         return ['file' => $imgClass->getPath(null, $sourceOptions), 'item' => $item];
@@ -555,7 +591,7 @@ class GoogleCloud
                     }
                     break;
                 case 'extension':
-                    if (in_array($value, ['jpg', 'png', 'webp', 'gif'])) {
+                    if (in_array($value, $this->available_extensions)) {
                         $this->setOption($key, $value);
                     }
                     break;
@@ -895,7 +931,7 @@ class GoogleCloud
      */
     public function noImg()
     {
-        return $this->config['no-image'];
+        return $this->config['no_image'];
     }
 
     //======================================================================
@@ -984,16 +1020,24 @@ class GoogleCloud
      */
     private function getCache($key)
     {
+        if (isset($this->config['cache']) && !$this->config['cache']) {
+            return false;
+        }
         return $this->cache->get($key);
     }
+
 
     /**
      * @param $key
      * @param $val
+     * @return bool|void
      */
     private function setCache($key, $val)
     {
-        $this->cache->forever($key, $val);
+        if (isset($this->config['cache']) && !$this->config['cache']) {
+            return false;
+        }
+        return $this->cache->forever($key, $val);
     }
 
     /**
