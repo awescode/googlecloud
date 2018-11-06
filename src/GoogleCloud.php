@@ -19,21 +19,16 @@ class GoogleCloud
     protected $disk;
     protected $locally;
 
-
-    /*
-     * Key for caching links
-     */
-    protected $cache_key;
-
     /*
      * Tmp array with main image for <picture>
      */
-    protected $picture_main_image;
+    protected $picture_main_image = [];
 
     protected $available_extensions = ['jpg', 'png', 'gif', 'webp'];
 
     // Default values of options
-    protected $options = [
+    protected $options = [];
+    protected $options_default = [
         'cropmode' => 'strong',
         'quality' => '75',
         'isretina' => true,
@@ -55,6 +50,15 @@ class GoogleCloud
         $this->config = $config;
         $this->disk = $disk;
         $this->locally = $this->config['locally'];
+    }
+
+    /**
+     * Initialization
+     */
+    public function init()
+    {
+        $this->options = $this->options_default;
+        $this->picture_main_image = [];
     }
 
     //======================================================================
@@ -79,6 +83,8 @@ class GoogleCloud
         if ($cacheHtml = $this->getCache($key)) {
             return $this->res($cacheHtml, 'URL: from cache');
         }
+        $this->init();
+
         $start = microtime(true);
 
         $this->setOptions($option);
@@ -114,6 +120,9 @@ class GoogleCloud
         if ($cacheHtml = $this->getCache($key)) {
             return $this->res($cacheHtml, 'IMG: from cache');
         }
+
+        $this->init();
+
         $start = microtime(true);
 
         $this->setOptions($option);
@@ -122,10 +131,10 @@ class GoogleCloud
 
         $file = $this->convertUrl($url);
 
-        if (!$this->hasFile($file)) {
+        if (!$this->hasFile($this->tmpTransform($file))) {
             $file2x = $this->getUrl2x($path);
             $elements = [
-                $this->getSrc($file, 'dynamic', $isTest),
+                $this->getSrc($url, 'dynamic', $isTest),
                 $this->getSrcSet($file2x, 'dynamic', $isTest),
                 $this->getAlt(),
                 $this->getTitle(),
@@ -171,6 +180,9 @@ class GoogleCloud
         if ($cacheHtml = $this->getCache($key)) {
             return $this->res($cacheHtml, 'PICTURE: from cache');
         }
+
+        $this->init();
+
         $start = microtime(true);
 
         $this->setOptions($option);
@@ -180,12 +192,12 @@ class GoogleCloud
 
         $file = $this->convertUrl($url);
 
-        if (!$this->hasFile($file)) {
+        if (!$this->hasFile($this->tmpTransform($file))) {
 
             $attributes = $this->getAttributes();
 
             $img = $this->getHtmlImg([
-                $this->getSrc($url, 'dynamic', $isTest),
+                $this->getSrc($this->tmpTransform($url), 'dynamic', $isTest),
                 $this->getAlt(),
                 $this->getTitle()
             ]);
@@ -263,7 +275,7 @@ class GoogleCloud
     {
         $gh = new DecodeURL($file);
         $gh->decodeUrl();
-        return $gh->thumb;
+        return $gh->encodeUrl;
     }
 
     /**
@@ -828,6 +840,17 @@ class GoogleCloud
     }
 
     /**
+     * Get URL 2x from options
+     *
+     * @param $path
+     * @return string
+     */
+    private function getUrl2x($path)
+    {
+        return $this->getUrl($path, $this->isRetina());
+    }
+
+    /**
      * Get URL from income options
      *
      * @param $options
@@ -841,17 +864,7 @@ class GoogleCloud
         return '';
     }
 
-    /**
-     * Get URL 2x from options
-     *
-     * @param $path
-     * @return string
-     */
-    private function getUrl2x($path)
-    {
-        $imgClass = new Encode($path, $this->mappingToEncode(), $this->config);
-        return $imgClass->getPath($this->isRetina());
-    }
+
 
     /**
      * Get src="" tag with correct URL inside
@@ -938,17 +951,19 @@ class GoogleCloud
     // Support function
     //======================================================================
 
+
     /**
      * Get static URL
      *
-     * @param bool $original
      * @return string
      */
     private function sUrl()
     {
-        return (!$this->getOption('original'))
-            ? $this->config['cdn-static'] . '/' . $this->config['thumb_folder'] . '/'
-            : $this->config['cdn-static'] . '/';
+        if (!$this->getOption('original')) {
+            return $this->config['cdn-static'] . '/' . $this->config['thumb_folder'] . '/';
+        } else {
+            return $this->config['cdn-static'] . '/';
+        }
     }
 
     /**
@@ -1000,6 +1015,14 @@ class GoogleCloud
 //-----------------------------------------------------
 // API methods: Disk
 //-----------------------------------------------------
+
+    private function tmpTransform($path)
+    {
+        if (!$this->getOption('original')){
+            $path = $this->config['thumb_folder'] . '/' . $path;
+        }
+        return $path;
+    }
 
     /**
      * @param $path
