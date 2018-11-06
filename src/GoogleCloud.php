@@ -30,7 +30,7 @@ class GoogleCloud
     protected $options = [];
     protected $options_default = [
         'cropmode' => 'strong',
-        'quality' => '75',
+        'quality' => '85',
         'isretina' => true,
         'extension' => 'jpg',
         'original' => false,   // service option, will use if you want to use original image
