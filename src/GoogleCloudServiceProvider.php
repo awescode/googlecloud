@@ -16,7 +16,7 @@ class GoogleCloudServiceProvider extends ServiceProvider
     {
         $this->publishes([
             __DIR__.'/App/config/googlecloud.php' => config_path('googlecloud.php'),
-        ], 'googlecloud.config');
+        ], 'config');
     }
 
     /**

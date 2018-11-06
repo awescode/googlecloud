@@ -4,8 +4,10 @@ namespace Awescode\GoogleCloud\App;
 
 require 'vendor/autoload.php';
 require_once 'DecodeURL.php';
+
 use Google\Cloud\Storage\StorageClient;
 use google\appengine\api\cloud_storage\CloudStorageTools;
+use google\appengine\api\cloud_storage\CloudStorageException;
 
 //Init libs
 $gh = new DecodeURL($_SERVER['REQUEST_URI']);
@@ -44,9 +46,18 @@ if (!$image->exists()) {
     exit;
 }
 
+// Check the size of the image
+if ($size = $gh->isAllowedSize($image)) {
+    syslog(LOG_INFO, 'The source image (' . $gh->image . ') is too big.');
+    header('Content-Type: ' . $gh->config['error_image_type']);
+    header('Error: ' . str_replace(":size", $size, $gh->config['error_image_to_big']));
+    echo base64_decode($gh->config['error_image']);
+    exit;
+}
+
 //Проверка переданных опций, если опции не заданы, отдаем оригинал
 $options = ($gh->meta['modify'] && $gh->meta['modify'] !== '--') ? explode('--', $gh->meta['modify']) : false;
-if ( !$options || count($options) < 1 ) {
+if (!$options || count($options) < 1) {
     header('HTTP/1.1 301 Moved Permanently');
     header("Location: {$gh->config['cdn-static']}/{$gh->image}");
     exit;
@@ -54,11 +65,19 @@ if ( !$options || count($options) < 1 ) {
 
 //Генерация превью, отдаем в браузер
 foreach ($options as $option) {
-    $magicUrl = CloudStorageTools::getImageServingUrl($image->gcsUri());
-    $bucket->upload(
-        file_get_contents($magicUrl. '=' . $option),
-        ['name' => $gh->getThumbNext()]
-    );
+    try {
+        $magicUrl = CloudStorageTools::getImageServingUrl($image->gcsUri());
+        $bucket->upload(
+            file_get_contents($magicUrl . '=' . $option),
+            ['name' => $gh->getThumbNext()]
+        );
+    } catch (CloudStorageException $e) {
+        syslog(LOG_ERR, 'There was an exception creating the Image Serving URL, details ' . $e->getMessage());
+        header('Content-Type: ' . $gh->config['error_image_type']);
+        header('Error: ' . $gh->config['error_image_not_valid']);
+        echo base64_decode($gh->config['error_image']);
+        exit;
+    }
 }
 
 //$thumb->reload();

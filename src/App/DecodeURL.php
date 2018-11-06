@@ -74,13 +74,28 @@ class DecodeURL extends Jnt
         $this->meta['imageName'] = implode("_", array_slice($opt, 1, $count_otp-4, true));
         $this->meta['getExtId'] = $opt[$count_otp-2];
         $this->meta['modify'] = $opt[$count_otp-1];
-
         return true;
     }
 
     public function validate()
     {
         return ($this->meta && ($this->hash == $this->getHashObj($this->meta)));
+    }
+
+    /**
+     * @param $object
+     * @return bool|float
+     */
+    public function isAllowedSize($object)
+    {
+        $info = $object->info();
+        if (isset($info['size'])) {
+            $size_in_mb = $info['size'] / 1024 / 1024;
+            if ($size_in_mb > $this->config['max_size']) {
+                return round($size_in_mb, 2);
+            }
+        }
+        return false;
     }
 
     //Следующее изображение

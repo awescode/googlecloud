@@ -19,13 +19,6 @@ $ composer require awescode/googlecloud
 
 The package will automatically register itself.
 
-You can publish the migration with:
-
-```bash
-php artisan vendor:publish --provider="Awescode\GoogleCloud\Providers\GoogleCloudServiceProvider" --tag="migrations"
-```
-
-
 You can publish the config file with:
 
 ```bash
