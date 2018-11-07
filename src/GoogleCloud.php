@@ -24,7 +24,7 @@ class GoogleCloud
      */
     protected $picture_main_image = [];
 
-    protected $available_extensions = ['jpg', 'png', 'gif', 'webp'];
+    protected $available_extensions = [];
 
     // Default values of options
     protected $options = [];
@@ -50,6 +50,7 @@ class GoogleCloud
         $this->config = $config;
         $this->disk = $disk;
         $this->locally = $this->config['locally'];
+        $this->available_extensions = $this->config['available_extensions'];
     }
 
     /**

@@ -16,6 +16,7 @@ return [
         'webp' => 4,
         'jpeg' => 5
     ],
+    'available_extensions' => ['jpg', 'png', 'gif', 'webp', 'jpeg'],
     'thumb_folder' => 'thumb',
     'slug_length' => 60,
     'max_size' => 15, // In megabytes
