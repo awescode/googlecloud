@@ -71,6 +71,7 @@ foreach ($options as $option) {
             file_get_contents($magicUrl . '=' . $option),
             ['name' => $gh->getThumbNext()]
         );
+        CloudStorageTools::deleteImageServingUrl($image->gcsUri());
     } catch (CloudStorageException $e) {
         syslog(LOG_ERR, 'There was an exception creating the Image Serving URL, details ' . $e->getMessage());
         header('Content-Type: ' . $gh->config['error_image_type']);
