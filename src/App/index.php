@@ -20,6 +20,7 @@ if (!$gh->decodeUrl()) {
 
 $storage = new StorageClient();
 
+
 //Init objects
 $bucket = $storage->bucket($gh->config['bucket']);
 $image = $bucket->object($gh->image);
@@ -27,20 +28,20 @@ $thumb = $bucket->object($gh->thumb);
 
 //Processing
 
-//Запрос не прошел провреку
+// The key is not valid
 if (!$gh->validate()) {
     header('HTTP/1.0 403 Forbidden');
     exit;
 }
 
-//Превью есть, отдаем 301 редирект
+// The image already cropped, return 301 redirect to thumb
 if ($thumb->exists()) {
     header('HTTP/1.1 301 Moved Permanently');
     header("Location: {$gh->config['cdn-static']}/{$gh->thumb}");
     exit;
 }
 
-//Такого изображения нет, отдаем 404
+// The image was not found, return 404
 if (!$image->exists()) {
     header("HTTP/1.0 404 Not Found");
     exit;
@@ -55,7 +56,7 @@ if ($size = $gh->isAllowedSize($image)) {
     exit;
 }
 
-//Проверка переданных опций, если опции не заданы, отдаем оригинал
+// Check input options, if the options are not exist, return original
 $options = ($gh->meta['modify'] && $gh->meta['modify'] !== '--') ? explode('--', $gh->meta['modify']) : false;
 if (!$options || count($options) < 1) {
     header('HTTP/1.1 301 Moved Permanently');
@@ -63,27 +64,31 @@ if (!$options || count($options) < 1) {
     exit;
 }
 
-//Генерация превью, отдаем в браузер
-foreach ($options as $option) {
-    try {
-        $magicUrl = CloudStorageTools::getImageServingUrl($image->gcsUri());
-        $bucket->upload(
-            file_get_contents($magicUrl . '=' . $option),
-            ['name' => $gh->getThumbNext()]
-        );
-        CloudStorageTools::deleteImageServingUrl($image->gcsUri());
-    } catch (CloudStorageException $e) {
-        syslog(LOG_ERR, 'There was an exception creating the Image Serving URL, details ' . $e->getMessage());
-        header('Content-Type: ' . $gh->config['error_image_type']);
-        header('Error: ' . $gh->config['error_image_not_valid']);
-        echo base64_decode($gh->config['error_image']);
-        exit;
-    }
+// Getting Magic link for croping
+try {
+    $magicUrl = CloudStorageTools::getImageServingUrl($image->gcsUri());
+} catch (CloudStorageException $e) {
+    syslog(LOG_ERR, 'There was an exception creating the Image Serving URL, details ' . $e->getMessage());
+    header('Content-Type: ' . $gh->config['error_image_type']);
+    header('Error: ' . $gh->config['error_image_not_valid']);
+    echo base64_decode($gh->config['error_image']);
+    exit;
 }
 
-//$thumb->reload();
+// Thumb generation
+foreach ($options as $option) {
+    $name = $gh->getThumbNext();
+    $cropMagicLink = $magicUrl . '=' . $option . '-v' . time();
 
-//Отдаем картику в браузер
+    $bucket->upload(
+        file_get_contents($cropMagicLink),
+        ['name' => $name]
+    );
+}
+// Removing magic link from google
+CloudStorageTools::deleteImageServingUrl($image->gcsUri());
+
+// Send the image to browser
 header("Content-Type: " . $thumb->info()['contentType']);
 header('Content-Length: ' . $thumb->info()['size']);
 $stream = $thumb->downloadAsStream();
