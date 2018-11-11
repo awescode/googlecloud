@@ -36,6 +36,9 @@ if (!$gh->validate()) {
 
 // The image already cropped, return 301 redirect to thumb
 if ($thumb->exists()) {
+    header("Cache-Control: no-store, no-cache, must-revalidate");
+    header("Pragma: no-cache"); //HTTP 1.0
+    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
     header('HTTP/1.1 301 Moved Permanently');
     header("Location: {$gh->config['cdn-static']}/{$gh->thumb}");
     exit;
