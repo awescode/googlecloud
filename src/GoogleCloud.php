@@ -26,6 +26,8 @@ class GoogleCloud
 
     protected $available_extensions = [];
 
+    protected $lazy_class = 'lazy';
+
     // Default values of options
     protected $options = [];
     protected $options_default = [
@@ -33,6 +35,7 @@ class GoogleCloud
         'quality' => '85',
         'isretina' => true,
         'extension' => 'jpg',
+        'lazy' => false,
         'original' => false,   // service option, will use if you want to use original image
         'modify' => []       // service option, modify will use for generation string to google
     ];
@@ -598,6 +601,7 @@ class GoogleCloud
                         $this->setOption($key, (int)$value);
                     }
                     break;
+                case 'lazy':
                 case 'isretina':
                     if (is_bool($value)) {
                         $this->setOption($key, $value);
@@ -776,15 +780,45 @@ class GoogleCloud
             if ($attr_value != null) {
                 if (is_array($attr_value)) {
                     foreach ($attr_value as $key => $value) {
-                        $attrOutput[] = $key . '="' . $value . '"';
+                        $attrOutput[$key] = $value;
                     }
                 } else {
-                    $attrOutput[] = $attr_name . '="' . $attr_value . '"';
+                    $attrOutput[$attr_name] = $attr_value;
                 }
             }
         }
 
-        return implode(" ", $this->trimArray($attrOutput));
+        // Added lazy load class if the option is enabled
+        if ($this->isLazy()) {
+            if (in_array("class", array_keys($attrOutput))) {
+                $attrOutput['class'] .= ' ' . $this->lazy_class;
+            } else {
+                $attrOutput['class'] = $this->lazy_class;
+            }
+        }
+
+        return $this->formattingAttributeArray($attrOutput);
+    }
+
+    /**
+     * Function for generation of attributes from array
+     *
+     * @param $array
+     * @return string
+     */
+    private function formattingAttributeArray($array)
+    {
+        return implode(' ', array_map(
+            function ($v, $k) {
+                if (trim($v) != "") {
+                    return sprintf('%s="%s"', $k, $v);
+                } else {
+                    return '';
+                }
+            },
+            $array,
+            array_keys($array)
+        ));
     }
 
     /**
@@ -823,6 +857,19 @@ class GoogleCloud
     {
         if ($this->getOption('isretina')) {
             return 2 * $coof;
+        }
+        return false;
+    }
+
+    /**
+     * Checking is lazy load picture should be or not
+     *
+     * @return bool
+     */
+    private function isLazy()
+    {
+        if ($this->getOption('lazy')) {
+            return true;
         }
         return false;
     }
@@ -878,6 +925,11 @@ class GoogleCloud
     private function getSrc($file, $type = '', $isCache = false)
     {
         $url = $this->urlGenerate($file, $type, $isCache);
+
+        if ($this->isLazy()) {
+            return 'data-src="' . $url . '"';
+        }
+
         return 'src="' . $url . '"';
     }
 
@@ -895,6 +947,9 @@ class GoogleCloud
             return '';
         }
         $url = $this->urlGenerate($file, $type, $isCache);
+        if ($this->isLazy()) {
+            return 'data-srcset="' . $url . ' 2x"';
+        }
         return 'srcset="' . $url . ' 2x"';
     }
 

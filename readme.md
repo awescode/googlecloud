@@ -49,7 +49,8 @@ $options = [
     * `circularly` - generates a circularly cropped image
     * `smallest` - square crop to smallest of: width, height
     */
-    'cropmode'  => 'strong',         
+    'cropmode'  => 'strong',
+    'lazy'      => false, // defaule: false    
     'alt'       => 'The text for alt attribute', // default: empty
     'title'     => 'The title for title attribute', // default: empty
     'class'     => 'css-class-1 css-class-2', // default: empty
