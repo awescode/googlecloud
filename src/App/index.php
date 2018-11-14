@@ -36,12 +36,7 @@ if (!$gh->validate()) {
 
 // The image already cropped, return 301 redirect to thumb
 if ($thumb->exists()) {
-    header("Cache-Control: no-store, no-cache, must-revalidate");
-    header("Pragma: no-cache"); //HTTP 1.0
-    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-    header('HTTP/1.1 301 Moved Permanently');
-    header("Location: {$gh->config['cdn-static']}/{$gh->thumb}");
-    exit;
+    $gh->redirect($gh->config['cdn-static'] . '/' . $gh->thumb);
 }
 
 // The image was not found, return 404
@@ -62,9 +57,7 @@ if ($size = $gh->isAllowedSize($image)) {
 // Check input options, if the options are not exist, return original
 $options = ($gh->meta['modify'] && $gh->meta['modify'] !== '--') ? explode('--', $gh->meta['modify']) : false;
 if (!$options || count($options) < 1) {
-    header('HTTP/1.1 301 Moved Permanently');
-    header("Location: {$gh->config['cdn-static']}/{$gh->image}");
-    exit;
+    $gh->redirect($gh->config['cdn-static'] . '/' . $gh->image);
 }
 
 // Getting Magic link for croping
@@ -91,9 +84,5 @@ foreach ($options as $option) {
 // Removing magic link from google
 CloudStorageTools::deleteImageServingUrl($image->gcsUri());
 
-// Send the image to browser
-header("Content-Type: " . $thumb->info()['contentType']);
-header('Content-Length: ' . $thumb->info()['size']);
-$stream = $thumb->downloadAsStream();
-echo $stream->getContents();
-exit;
+// Send redirect to image to browser
+$gh->redirect($gh->config['cdn-static'] . '/' . $gh->thumb);
