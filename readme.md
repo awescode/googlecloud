@@ -5,7 +5,7 @@
 [![Build Status][ico-travis]][link-travis]
 [![StyleCI][ico-styleci]][link-styleci]
 
-This is where your description should go. Take a look at [contributing.md](contributing.md) to see a to do list.
+🍕 The Laravel Package for cropping images based on Google Cloud Services.
 
 ## Installation
 
@@ -32,6 +32,16 @@ cd ./src/App
 composer install
 gcloud app deploy --project={project_id}
 ```
+
+### .env file
+Available variables:
+```bash
+GOOGLE_CLOUD_DYNAMIC_URL=https://img.{domain}
+STATIC_SERVER_URL=https://cdn.{domain}
+GOOGLE_CLOUD_STORAGE_BUCKET={bucket_name}
+GOOGLE_CLOUD_KEY={secret_key} #random string, this key need for protection of your URLs
+```
+
 
 ## Available options
 The all variables are `optional`.

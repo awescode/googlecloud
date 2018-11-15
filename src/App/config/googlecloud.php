@@ -5,10 +5,10 @@ return [
     'debug' => true,
     'cache' => true,
 
-    'cdn-dynamic' => 'https://img.lagerbox.com',
-    'cdn-static' => 'https://cdn.lagerbox.com',
-    'bucket' => 'cdn.lagerbox.com',
-    'secret_key' => 'c463bcdadf48765b205ca9e8fcfb66c3',
+    'cdn-dynamic' => env('GOOGLE_CLOUD_DYNAMIC_URL', 'null'),
+    'cdn-static' => env('STATIC_SERVER_URL', 'null'),
+    'bucket' => env('GOOGLE_CLOUD_STORAGE_BUCKET', 'null'),
+    'secret_key' => env('GOOGLE_CLOUD_KEY', 'null'),
     'ext_mapping' => [
         'jpg' => 1,
         'png' => 2,
