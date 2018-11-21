@@ -96,6 +96,7 @@ class GoogleCloud
         $file = $this->getUrl($path);
         if (!$this->hasFile($file)) {
             $cacheHtml = $this->urlGenerate($file, 'dynamic', $isTest);
+
             $end = microtime(true);
             return $this->res($cacheHtml, 'URL: dynamic, time: ' . round(($end - $start) / 1000, 4));
         } else {
@@ -201,7 +202,7 @@ class GoogleCloud
             $attributes = $this->getAttributes();
 
             $img = $this->getHtmlImg([
-                $this->getSrc($this->tmpTransform($url), 'dynamic', $isTest),
+                $this->getSrc($url, 'dynamic', $isTest),
                 $this->getAlt(),
                 $this->getTitle()
             ]);
@@ -215,7 +216,7 @@ class GoogleCloud
             $attributes = $this->getAttributes();
 
             $img = $this->getHtmlImg([
-                $this->getSrc($url, 'static', $isTest),
+                $this->getSrc($file, 'static', $isTest),
                 $this->getAlt(),
                 $this->getTitle()
             ]);
@@ -409,9 +410,11 @@ class GoogleCloud
             if (isset($source['item'])) {
                 $item = $source['item'];
             }
+
             $url = $this->urlGenerate($file, $mode, $isTest);
             $elements = [
                 'srcset="' . $url . '"',
+                'type="' . $this->getFileType($file) . '"',
                 $this->getAttributes($item)
             ];
             $output[] = '<source ' . implode(" ", $elements) . '>';
@@ -440,6 +443,17 @@ class GoogleCloud
         return $config_priority;
     }
 
+    /**
+     * Get image type base of file name
+     *
+     * @param $file
+     * @return string
+     */
+    private function getFileType($file)
+    {
+        $extension = pathinfo($file, PATHINFO_EXTENSION);
+        return ($extension == 'jpg') ?  "image/jpeg" : "image/" . $extension;
+    }
 
     /**
      * Get modify variables from options

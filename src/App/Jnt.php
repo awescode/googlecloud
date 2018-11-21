@@ -8,7 +8,8 @@ class Jnt
 {
     public $config;
 
-    function init() {
+    function init()
+    {
         $this->config = (include 'config/googlecloud.php');
     }
 
@@ -31,17 +32,29 @@ class Jnt
      * @param $path
      * @return object
      */
-    public static function getFileInfo($path) {
+    public static function getFileInfo($path)
+    {
         $fileInfo = new \SplFileInfo($path);
 
         $filePath = $fileInfo->getPath();
         $fileExt = $fileInfo->getExtension();
         $fileName = $fileInfo->getBasename(".{$fileExt}");
-        return (object) [
+        return (object)[
             'path' => $filePath,
             'name' => $fileName,
             'ext' => $fileExt
         ];
+    }
+
+    /**
+     * Return the correct content type
+     *
+     * @param $extension
+     * @return string
+     */
+    public function getContentType($extension)
+    {
+        return ($extension == 'jpg') ?  "image/jpeg" : "image/" . $extension;
     }
 
     /**
@@ -61,7 +74,8 @@ class Jnt
      * @param bool $reverse
      * @return bool
      */
-    public function getExtId($ext, $reverse = false) {
+    public function getExtId($ext, $reverse = false)
+    {
         $conf = (!$reverse) ? $this->config['ext_mapping'] : array_flip($this->config['ext_mapping']);
         return (isset($conf[$ext])) ? $conf[$ext] : false;
     }
@@ -73,10 +87,11 @@ class Jnt
      * @param $m
      * @return mixed
      */
-    public static function multOpt($opt, $m = false, $set = []) {
+    public static function multOpt($opt, $m = false, $set = [])
+    {
         if ($set != []) {
             $modify = [];
-            foreach($set as $item) {
+            foreach ($set as $item) {
                 $modify[] = $item->modify;
             }
             return implode("--", $modify);
@@ -119,6 +134,68 @@ class Jnt
         return implode('/', $clearArray);
     }
 
+
+    /**
+     * Build an URL from parameters
+     *
+     * @param $path
+     * @param $slug
+     * @param $file_name
+     * @param $ext_id
+     * @param $modify
+     * @param $ext
+     * @return string
+     */
+    public function buildUrl($path, $slug, $file_name, $ext_id, $modify, $ext)
+    {
+        $hash = $this->getHashObj([
+            $this->config['secret_key'],
+            $slug,
+            $file_name,
+            $ext_id,
+            $modify
+        ]);
+
+        return $this->assemblyUrl([
+            $path,
+            "{$slug}_{$file_name}_{$hash}_{$ext_id}_{$modify}.{$ext}"
+        ]);
+    }
+
+    /**
+     * Parse an URL
+     *
+     * @param $fileName
+     * @return array|bool
+     */
+    public function parseUrl($fileName)
+    {
+        $opt = explode('_', $fileName);
+
+        if (count($opt) < 5) {
+            return false;
+        }
+        $count_otp = count($opt);
+
+        if (isset($opt[0]) && strpos($opt[0], "/") !== false) {
+            $pathObject = explode("/", $opt[0]);
+            $clearSlug = $pathObject[count($pathObject) - 1];
+        } else {
+            $clearSlug = $opt[0];
+        }
+
+        $meta = [
+            'key' => $this->config['secret_key'],
+            'slug' => $opt[0],
+            'imageName' => implode("_", array_slice($opt, 1, $count_otp - 4, true)),
+            'getExtId' => $opt[$count_otp - 2],
+            'modify' => $opt[$count_otp - 1]
+        ];
+
+        return ['hash' => $opt[$count_otp - 3], 'clear_slug' => $clearSlug, 'meta' => $meta];
+    }
+
+
     /**
      * Получить хеш объекта
      *
@@ -137,7 +214,8 @@ class Jnt
      * @param $str
      * @return null|string|string[]
      */
-    public function strClear($str) {
+    public function strClear($str)
+    {
         URLify::remove_words([]);
         $str = str_replace('_', '-', $str);
         $test = preg_replace('~\.~', '', URLify::filter($str, $this->config['slug_length'], $this->getLocally(), true));

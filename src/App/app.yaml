@@ -2,6 +2,12 @@ runtime: php55
 api_version: 1
 threadsafe: true
 
+env_variables:
+    GOOGLE_CLOUD_DYNAMIC_URL: https://img.lagerbox.com
+    STATIC_SERVER_URL: https://cdn.lagerbox.com
+    GOOGLE_CLOUD_STORAGE_BUCKET: cdn.lagerbox.com
+    GOOGLE_CLOUD_KEY: c463bcdadf48765b205ca9e8fcfb66c3
+
 handlers:
 - url: /.*
   script: index.php

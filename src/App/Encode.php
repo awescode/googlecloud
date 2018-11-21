@@ -63,23 +63,7 @@ class Encode extends Jnt
         $slug = $this->strClear($slug);
         $ext = $this->options->ext ?? $fileInfo->ext;
 
-        //Хеш картинки
-        $hash = implode("_", [
-            $fileInfo->name,
-            $this->getHashObj([
-                $this->config['secret_key'],
-                $slug,
-                $fileInfo->name,
-                $this->getExtId($fileInfo->ext),
-                $opt
-            ]),
-            $this->getExtId($fileInfo->ext)
-        ]);
-
-        return $this->assemblyUrl([
-            $fileInfo->path,
-            "{$slug}_{$hash}_{$opt}.{$ext}"
-        ]);
+        return $this->buildUrl($fileInfo->path, $slug, $fileInfo->name, $this->getExtId($fileInfo->ext), $opt, $ext);
     }
 
     /**

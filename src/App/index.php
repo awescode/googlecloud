@@ -4,6 +4,7 @@ namespace Awescode\GoogleCloud\App;
 
 require 'vendor/autoload.php';
 require_once 'DecodeURL.php';
+require_once 'helper.php';
 
 use Google\Cloud\Storage\StorageClient;
 use google\appengine\api\cloud_storage\CloudStorageTools;
@@ -71,16 +72,37 @@ try {
     exit;
 }
 
+
 // Thumb generation
 foreach ($options as $option) {
     $name = $gh->getThumbNext();
+
     $cropMagicLink = $magicUrl . '=' . $option . '-v' . time();
 
+    $imageContent = grab_image($cropMagicLink);
+
+    if ($imageContent === false) {
+        syslog(LOG_ERR, 'There was an exception creating - The modify variables is not correct. ');
+        header('Content-Type: ' . $gh->config['error_image_type']);
+        header('Error: The modify variables is not correct.');
+        echo base64_decode($gh->config['error_image']);
+        exit;
+    }
+
     $bucket->upload(
-        file_get_contents($cropMagicLink),
-        ['name' => $name]
+        $imageContent,
+        [
+            'name' => $name,
+            'media' => true,
+            'publicRead' => true,
+            'metadata' => [
+                'cacheControl' => 'public, max-age=2592000',
+                'contentType' => $gh->getContentType($gh->extension)
+            ]
+        ]
     );
 }
+
 // Removing magic link from google
 CloudStorageTools::deleteImageServingUrl($image->gcsUri());
 

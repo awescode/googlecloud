@@ -12,6 +12,7 @@ class DecodeURL extends Jnt
     public $encodeUrl;
     //Полный путь до превью
     public $thumb;
+    public $extension;
     public $thumbNext;
     //Полный путь до оригинала
     public $image;
@@ -42,6 +43,8 @@ class DecodeURL extends Jnt
         $fileInfo = new \SplFileInfo($encodeUrl);
         $fileName = $fileInfo->getBasename(".{$fileInfo->getExtension()}");
 
+        $this->extension = $fileInfo->getExtension();
+
         if (!$this->setMeta($fileName)) {
             return false;
         }
@@ -60,20 +63,16 @@ class DecodeURL extends Jnt
     }
 
     public function setMeta($fileName) {
-        $opt = explode('_', $fileName);
 
-        if (count($opt) < 5) {
+        $parse_result = $this->parseUrl($fileName);
+
+        if (!$parse_result) {
             $this->meta = false;
             return false;
         }
-        $count_otp = count($opt);
 
-        $this->hash = $opt[$count_otp-3];
-        $this->meta['key'] = $this->config['secret_key'];
-        $this->meta['slug'] = $opt[0];
-        $this->meta['imageName'] = implode("_", array_slice($opt, 1, $count_otp-4, true));
-        $this->meta['getExtId'] = $opt[$count_otp-2];
-        $this->meta['modify'] = $opt[$count_otp-1];
+        $this->hash = $parse_result['hash'];
+        $this->meta = $parse_result['meta'];
         return true;
     }
 
@@ -100,32 +99,29 @@ class DecodeURL extends Jnt
 
     //Следующее изображение
     public function getThumbNext() {
+
         $thumb = $this->thumbNext;
 
+        $parse_result = $this->parseUrl($thumb);
+
         $fileInfo = new \SplFileInfo($thumb);
-        $fileExt = $fileInfo->getExtension();
-        //$fileName = preg_replace("/\.{$fileExt}$/", '', $thumb);
-        $fileName = $fileInfo->getBasename(".{$fileInfo->getExtension()}");
         $filePath = $fileInfo->getPath();
+        $fileExt = $fileInfo->getExtension();
 
-        //Разбираем
-        $oArr = explode('_', $fileName);
-        $mArr = explode('--', $oArr[4]);
+        $parse_result['meta']['modify'] = str_replace("." . $fileExt , "", $parse_result['meta']['modify']);
 
-        //Меняем один за другим
+        $mArr = explode('--', $parse_result['meta']['modify']);
+
+        // Change array for the next URL
         $op1 = array_shift($mArr);
         array_push($mArr, $op1);
 
-        //Собираем
-        $m = implode('--', $mArr);
-        $oArr[4] = $m;
+        // Join to string from shifted array
+        $parse_result['meta']['modify'] = implode('--', $mArr);
 
-        $oArr[2] = $this->getHashObj([
-            $this->config['secret_key'],
-            $oArr[0], $oArr[1], $oArr[3], $oArr[4]
-        ]);
+        // Save for the next iteration
+        $this->thumbNext = $this->buildUrl($filePath, $parse_result['clear_slug'], $parse_result['meta']['imageName'], $parse_result['meta']['getExtId'], $parse_result['meta']['modify'], $fileExt);
 
-        $this->thumbNext = $filePath .'/'. implode('_', $oArr) . '.' . $fileExt;
         return $thumb;
     }
 

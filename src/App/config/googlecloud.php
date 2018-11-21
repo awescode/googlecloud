@@ -2,7 +2,7 @@
 
 return [
 
-    'debug' => true,
+    'debug' => false,
     'cache' => true,
 
     'cdn-dynamic' => env('GOOGLE_CLOUD_DYNAMIC_URL', 'null'),
