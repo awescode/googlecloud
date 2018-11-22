@@ -470,9 +470,40 @@ class GoogleCloud
         }
         if ($this->hasOption('modify', $options)) {
             $modify = array_unique($this->getOption('modify', $options));
+            $modify = $this->modifyFiltering($modify);
             return implode("-", $modify);
         }
         return '';
+    }
+
+    /**
+     * Removing from modify array duplicates
+     *
+     * @param $modifyArr
+     * @return array
+     */
+    private function modifyFiltering($modifyArr)
+    {
+        $elements = [];
+        foreach ($modifyArr as $element) {
+            preg_match("/([a-z]{1,2})([0-9]{0,4})/", $element, $m);
+            $elements[$m[1]] = $m[2];
+        }
+        $found = false;
+        foreach(['cc', 'pp', 'n', 'p', 'c'] as $item) {
+            if (!$found && isset($elements[$item])) {
+                $found = true;
+                continue;
+            }
+            if ($found && isset($elements[$item])) {
+                unset($elements[$item]);
+            }
+        }
+        $return = [];
+        foreach($elements as $key => $value){
+            $return[] = $key.$value;
+        }
+        return $return;
     }
 
     /**
