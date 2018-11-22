@@ -204,7 +204,8 @@ class GoogleCloud
             $img = $this->getHtmlImg([
                 $this->getSrc($url, 'dynamic', $isTest),
                 $this->getAlt(),
-                $this->getTitle()
+                $this->getTitle(),
+                $this->getWidth()
             ]);
 
             $cacheHtml = $this->getHtmlPicture($attributes, $img, $sources,'dynamic', $isTest);
@@ -218,7 +219,8 @@ class GoogleCloud
             $img = $this->getHtmlImg([
                 $this->getSrc($file, 'static', $isTest),
                 $this->getAlt(),
-                $this->getTitle()
+                $this->getTitle(),
+                $this->getWidth()
             ]);
 
             $cacheHtml = $this->getHtmlPicture($attributes, $img, $sources, 'static', $isTest);
@@ -866,6 +868,11 @@ class GoogleCloud
         ));
     }
 
+    private function getWidth()
+    {
+        return 'width="100%"';
+    }
+
     /**
      * Getting Alt tag
      *
@@ -956,7 +963,6 @@ class GoogleCloud
         }
         return '';
     }
-
 
 
     /**
