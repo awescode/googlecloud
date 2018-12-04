@@ -637,6 +637,10 @@ class GoogleCloud
                     break;
                 case 'alt':
                 case 'title':
+                    if (trim($value) != "") {
+                        $this->setOption($key, $this->filterAltTitle($value));
+                    }
+                    break;
                 case 'class':
                 case 'id':
                     if (trim($value) != "") {
@@ -1191,6 +1195,20 @@ class GoogleCloud
         } else {
             return [];
         }
+    }
+
+    /**
+     * Light filtering of alt of title attribute
+     *
+     * @param $string
+     * @return string
+     */
+    private function filterAltTitle($string)
+    {
+        $string = str_replace("'", " ", $string);
+        $string = str_replace('"', " ", $string);
+        $string = preg_replace('/\s+/', ' ', $string);
+        return trim($string);
     }
 
     /**
